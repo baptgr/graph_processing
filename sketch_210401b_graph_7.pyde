@@ -1,42 +1,25 @@
 from random import randint, choice, sample
 from itertools import combinations
 
-frame_width = 800
-frame_height = 800
-n_verticles = 20
-n_edges = 50
-
+frame_width = 1200
+frame_height = 900
 drawers = []
 
 def setup(): 
-    
-    size(800, 800)
+    size(1200, 900)
     background(0)
     stroke(255)
-    #noLoop()
     drawers.append(Graph())
-    for _ in range(n_verticles): 
-        drawers[0].verticles.append(create_new_verticle())
-    
-    l = get_full_connected_edges(drawers[0].verticles)
-    drawers[0].edges = sample(l, n_edges)
+    create_verticle_grid(drawers[0])
+    drawers[0].edges = get_full_connected_edges(drawers[0].verticles)
     
     
-    
-
 def draw():  
-    
-    fill(0, 5)
-    rect(0, 0, width, height)
+    background(0)
     drawers[0].display_verticles()
     drawers[0].display()
     drawers[0].move()
-    #saveFrame("image_####.jpg")
-    
-
-        
-#def mousePressed():
-#    redraw()
+    saveFrame("image_####.jpg")
     
 
 class Graph: 
@@ -71,7 +54,7 @@ class Verticle:
     def move(self): 
         self.x += self._stepx
         self.y += self._stepy
-        if (self.x <= 0) or (self.x >= width) or (self.y <= 0) or (self.y >= height) :
+        if (self.x <= 150) or (self.x >= width -150) or (self.y <= 0) or (self.y >= height) :
             self._stepx = - self._stepx
             self._stepy = - self._stepy
 
@@ -87,9 +70,11 @@ class Edge:
              self._verticle2.x, 
              self._verticle2.y)
         
-        
-def create_new_verticle(): 
-    return Verticle(randint(0, frame_width), randint(0, frame_height))
+def create_verticle_grid(graph): 
+    for i in range(300, width - 150, 150) : 
+        for j in range(150, height, 150) : 
+            print(i, j)
+            graph.verticles.append(Verticle(i, j))
 
 def get_full_connected_edges(verticles): 
     l=[]
@@ -99,9 +84,5 @@ def get_full_connected_edges(verticles):
     return l
 
 def rotation_step(y) : 
-    return (float(y) / height - 0.5)* 3
-
-def outward_step(x, y) : 
-    center_x = width / 2
-    center_y = height / 2
+    return (float(y) / height - 0.5)* 7
     
