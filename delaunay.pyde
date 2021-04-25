@@ -1,93 +1,63 @@
 # With the help of : 
 # https://discourse.processing.org/t/fill-a-mesh-delaunay-object/3341/4
 
-from random import randint, choice, sample
-from itertools import combinations
 
-frame_width = 800
-frame_height = 450
-n_verticles = 20
-n_edges = 50
+add_library('triangulate')
 
-drawers = []
+from random import randint 
+from java.util import ArrayList
+
+n_vertex = 2000
+v_list = list()
 
 def setup(): 
-    size(800, 450)
+    size(800, 800)
     background(0)
     stroke(255)
-    noLoop()
-    drawers.append(Graph())
-    for _ in range(n_verticles): 
-        drawers[0].verticles.append(create_new_verticle())
     
-    l = get_full_connected_edges(drawers[0].verticles)
-    drawers[0].edges = sample(l, n_edges)
-    
-    
-    
+    for _ in range(n_vertex): 
+        v_list.append(Verticle(randint(-200, width + 200), randint(-200, height + 200)))
+    print(v_list)
 
-def draw():  
+    
+def draw(): 
     background(0)
-    drawers[0].display_verticles()
-    drawers[0].display()
-    #drawers[0].move()
     
-
-        
-def mousePressed():
-    redraw()
+    pvlist = ArrayList()
     
+    for verticle in v_list:
+        pvlist.add(PVector(verticle.x, verticle.y))
+        verticle.move()
 
-class Graph: 
-    def __init__(self): 
-        self.verticles = []
-        self.edges = []
-        
-    def display(self): 
-        for edge in self.edges : 
-            edge.display()
-            
-    def display_verticles(self): 
-        for verticle in self.verticles : 
-            verticle.display()
-        
-    def move(self): 
-        for verticle in self.verticles : 
-            verticle.move()
+    triangles = Triangulate.triangulate(pvlist)
 
-        
+    beginShape(TRIANGLES)
+    for t in triangles:
+        fill(0)
+        vertex(t.p1.x, t.p1.y)
+        vertex(t.p2.x, t.p2.y)
+        vertex(t.p3.x, t.p3.y)
+    endShape()
+    print("******")
+    saveFrame("output_2000/image_####.jpg")
+
 
 class Verticle: 
     def __init__(self, x, y): 
         self.x = x
         self.y = y
-        
-    def display(self): 
-        point(self.x, self.y)
+        self._stepx = randomGaussian() * 2
+        self._stepy = randomGaussian() * 2
         
     def move(self): 
-        self.x += randomGaussian() * 5
-        self.y += randomGaussian() * 5
-        
-class Edge: 
-    def __init__(self, verticle1, verticle2): 
-        self._verticle1 = verticle1
-        self._verticle2 = verticle2
-        
-    def display(self):
-        line(self._verticle1.x, 
-             self._verticle1.y, 
-             self._verticle2.x, 
-             self._verticle2.y)
-        
-        
-def create_new_verticle(): 
-    return Verticle(randint(0, frame_width), randint(0, frame_height))
+        self.x += self._stepx
+        self.y += self._stepy
+        if ((self.x <= -200) or (self.x >= width + 200) 
+            or (self.y <= -200) or (self.y >= height + 200)) :
+            self._stepx = - self._stepx
+            self._stepy = - self._stepy
 
-def get_full_connected_edges(verticles): 
-    l=[]
-    edges = combinations(verticles, 2)
-    for edge in edges : 
-        l.append(Edge(edge[0], edge[1]))
-    return l
+
     
+
+       
